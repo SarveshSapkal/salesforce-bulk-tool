@@ -120,25 +120,25 @@ def fetch_salesforce_data(instance_url,
 
 # Sidebar
 with st.sidebar:
-    st.title(" Login System")
-    login_type = st.radio("Action", ["Login", "Register"])
-    username = st.text_input("Username")
+    st.title("🔐 Salesforce Login")
 
-    if login_type == "Register":
-        c_id = st.text_input("Client ID")
-        c_sec = st.text_input("Client Secret", type="password")
-        t_url = st.text_input("Token URL")
-        if st.button("Register"):
-            st.success("Registered (demo mode)")
-    else:
-        st.title("🔐 Salesforce Login")
-        if st.button("Login to Salesforce"):
-            res = login_salesforce(
-                st.secrets["CLIENT_ID"],
-                st.secrets["CLIENT_SECRET"],
-                st.secrets["TOKEN_URL"])
+    if st.button("Login to Salesforce"):
+        res = login_salesforce(
+            st.secrets["CLIENT_ID"],
+            st.secrets["CLIENT_SECRET"],
+            st.secrets["TOKEN_URL"]
+        )
+
+        if "access_token" in res:
+            st.session_state['access_token'] = res['access_token']
+            st.session_state['instance_url'] = res['instance_url']
+            st.success("Login Successful ✅")
+        else:
+            st.error("Login Failed ❌")
 
     if "access_token" in st.session_state:
+        st.success("Connected to Salesforce ✅")
+
         if st.button("Logout"):
             st.session_state.clear()
             st.rerun()
