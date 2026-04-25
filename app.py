@@ -233,17 +233,14 @@ if "access_token" in st.session_state:
                                     st.session_state['instance_url'],
                                     st.session_state['access_token'],
                                     j_id)
-
-if failed_df is not None:
-    st.subheader("❌ Failed Records Details")
-    st.dataframe(failed_df)
-
+                            if failed_df is not None:
+                                st.subheader("❌ Failed Records Details")
+                                st.dataframe(failed_df)
                                 
                                 st.dataframe(get_failed_records(st.session_state['instance_url'], 
-                                                                        st.session_state['access_token'], 
-                                                                        j_id), 
-                                                                        width="content")
-                            save_upload_history(up_file.name, sel_obj, s_c, f_c)
+                                                                st.session_state['access_token'],
+                                                                j_id),width="content")
+                                save_upload_history(up_file.name, sel_obj, s_c, f_c)
 
     with tab_down:
         st.subheader("Download Data from Salesforce")
