@@ -55,7 +55,7 @@ def bulk_upload_to_salesforce(instance_url,
         "object": object_name, 
         "operation": operation.lower(), 
         "contentType": "CSV", 
-        "lineEnding": "CRLF"
+        "lineEnding": "LF"
     }
     
     # 
