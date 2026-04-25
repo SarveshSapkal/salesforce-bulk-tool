@@ -4,7 +4,16 @@ import pandas as pd
 import io
 import time
 # from microsoft_sql_db import save_mapping, load_mapping, save_upload_history, get_upload_history, save_user, get_user, save_downloaded_data
-from bulk_delete import bulk_delete
+# from bulk_delete import bulk_delete
+
+# ===== TEMP DUMMY FUNCTIONS FOR CLOUD =====
+def save_mapping(*args, **kwargs): pass
+def load_mapping(*args, **kwargs): return {}
+def save_upload_history(*args, **kwargs): pass
+def get_upload_history(): return None
+def save_user(*args, **kwargs): pass
+def get_user(*args, **kwargs): return None
+def save_downloaded_data(*args, **kwargs): pass
 
 # Configration
 st.set_page_config(page_title="SF Bulk Tool", layout="wide", page_icon="☁️")
@@ -15,14 +24,6 @@ client_id = st.text_input("Client ID")
 client_secret = st.text_input("Client Secret")
 token_url = st.text_input("Token URL")
 
-if st.button("Login"):
-    res = login_salesforce(client_id, client_secret, token_url)
-    if "access_token" in res:
-        st.session_state['access_token'] = res['access_token']
-        st.session_state['instance_url'] = res['instance_url']
-        st.success("Login Successful ✅")
-    else:
-        st.error("Login Failed ❌")
 
 def bulk_upload_to_salesforce(instance_url, 
                               access_token, 
@@ -114,20 +115,14 @@ with st.sidebar:
         c_sec = st.text_input("Client Secret", type="password")
         t_url = st.text_input("Token URL")
         if st.button("Register"):
-            save_user(username, c_id, c_sec, t_url)
+            st.success("Registered (demo mode)")
             st.success("Registered")
     else:
         if st.button("Login"):
-            user = get_user(username)
-            if user:
-                res = login_salesforce(user['client_id'], user['client_secret'], user['token_url'])
-                if "access_token" in res:
-                    st.session_state.update({'access_token': res['access_token'], 
-                                             'instance_url': res['instance_url'], 
-                                             'username': username})
-                    st.success("Success!")
-                else: st.error("SF Login Failed")
-            else: st.error("User not found")
+            st.session_state['username'] = username
+            st.session_state['access_token'] = "dummy"
+            st.session_state['instance_url'] = "https://dummy.salesforce.com"
+            st.success("Logged in successfully")
     if "access_token" in st.session_state:
         if st.button("Logout"): st.session_state.clear(); st.rerun()
 
@@ -253,7 +248,7 @@ if "access_token" in st.session_state:
         f"{d_obj}_data.csv",
         "text/csv")
 
-    with tab_del:
+   ''' with tab_del:
         st.subheader("Bulk Delete")
         dc1, dc2 = st.columns(2)
         with dc1: del_obj = st.selectbox("Select Object", ["-- Select --"] + objects, key="del_obj")
@@ -282,7 +277,7 @@ if "access_token" in st.session_state:
                             if dstate in ["JobComplete", "Failed", "Aborted"]: break
                             time.sleep(2)
                         st.metric("Status", dstate); 
-                        st.metric("Deleted", dproc)
+                        st.metric("Deleted", dproc) '''
 
     with tab_hist:
         h = get_upload_history()
