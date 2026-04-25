@@ -228,7 +228,18 @@ if "access_token" in st.session_state:
                             m1.metric("Status", state); 
                             m2.metric("Success ", s_c); 
                             m3.metric("Failed ", f_c, delta_color="inverse")
-                            if f_c > 0: st.dataframe(get_failed_records(st.session_state['instance_url'], 
+                            if f_c > 0:
+                                failed_df = get_failed_records(
+                                    st.session_state['instance_url'],
+                                    st.session_state['access_token'],
+                                    j_id)
+
+if failed_df is not None:
+    st.subheader("❌ Failed Records Details")
+    st.dataframe(failed_df)
+
+                                
+                                st.dataframe(get_failed_records(st.session_state['instance_url'], 
                                                                         st.session_state['access_token'], 
                                                                         j_id), 
                                                                         width="content")
