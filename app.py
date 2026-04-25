@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import io
 import time
-from microsoft_sql_db import save_mapping, load_mapping, save_upload_history, get_upload_history, save_user, get_user, save_downloaded_data
+# from microsoft_sql_db import save_mapping, load_mapping, save_upload_history, get_upload_history, save_user, get_user, save_downloaded_data
 from bulk_delete import bulk_delete
 
 # Configration
