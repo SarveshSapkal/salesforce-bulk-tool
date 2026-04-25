@@ -131,19 +131,12 @@ with st.sidebar:
         if st.button("Register"):
             st.success("Registered (demo mode)")
     else:
-        if st.button("Login"):
+        st.title("🔐 Salesforce Login")
+        if st.button("Login to Salesforce"):
             res = login_salesforce(
                 st.secrets["CLIENT_ID"],
                 st.secrets["CLIENT_SECRET"],
-                st.secrets["TOKEN_URL"]
-            )
-
-            if "access_token" in res:
-                st.session_state['access_token'] = res['access_token']
-                st.session_state['instance_url'] = res['instance_url']
-                st.success("Login Successful ✅")
-            else:
-                st.error("Login Failed ❌")
+                st.secrets["TOKEN_URL"])
 
     if "access_token" in st.session_state:
         if st.button("Logout"):
