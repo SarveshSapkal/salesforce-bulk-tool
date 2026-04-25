@@ -248,36 +248,7 @@ if "access_token" in st.session_state:
         f"{d_obj}_data.csv",
         "text/csv")
 
-   ''' with tab_del:
-        st.subheader("Bulk Delete")
-        dc1, dc2 = st.columns(2)
-        with dc1: del_obj = st.selectbox("Select Object", ["-- Select --"] + objects, key="del_obj")
-        with dc2: del_file = st.file_uploader("Upload ID CSV", type=["csv"], key="del_f")
-        if del_file and del_obj != "-- Select --":
-            df_del = pd.read_csv(del_file)
-            if "Id" not in df_del.columns: st.error("CSV must have 'Id' column.")
-            else:
-                conf = st.checkbox("Confirm Delete")
-                if st.button("Run Delete", disabled=not conf):
-                    start_d = time.time()
-                    j_id_d = bulk_delete(st.session_state['instance_url'], 
-                                         st.session_state['access_token'], 
-                                         del_obj, 
-                                         df_del[['Id']].to_csv(index=False))
-                    if j_id_d:
-                        st.info(f" Job: {j_id_d}")
-                        dpb = st.progress(0); dst = st.empty()
-                        while True:
-                            ds = get_job_status(st.session_state['instance_url'], 
-                                                st.session_state['access_token'], 
-                                                j_id_d)
-                            dstate, dproc = ds.get("state"), ds.get("numberRecordsProcessed", 0)
-                            dpb.progress(min(dproc/len(df_del), 1.0) if len(df_del)>0 else 0)
-                            dst.markdown(f"**Deleting:** {dproc:,}/{len(df_del):,} (`{dstate}`)")
-                            if dstate in ["JobComplete", "Failed", "Aborted"]: break
-                            time.sleep(2)
-                        st.metric("Status", dstate); 
-                        st.metric("Deleted", dproc) '''
+  
 
     with tab_hist:
         h = get_upload_history()
