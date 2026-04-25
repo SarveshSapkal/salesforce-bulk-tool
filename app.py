@@ -82,6 +82,8 @@ def bulk_upload_to_salesforce(instance_url,
     return job_id
 
 def get_job_status(instance_url, access_token, job_id):
+    if "errorMessage" in s and s["errorMessage"]:
+    st.error(f"Salesforce says: {s['errorMessage']}")
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}"
     return requests.get(url, headers={"Authorization": f"Bearer {access_token}"}).json()
 
