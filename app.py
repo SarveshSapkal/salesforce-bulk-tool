@@ -233,7 +233,8 @@ if "access_token" in st.session_state:
                                     st.session_state['instance_url'],
                                     st.session_state['access_token'],
                                     j_id)
-                            if failed_df is not None:
+                            if failed_df is not None and not failed_df.empty:
+                                
                                 st.subheader("❌ Failed Records Details")
                                 st.dataframe(failed_df)
                                 
