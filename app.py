@@ -82,10 +82,20 @@ def bulk_upload_to_salesforce(instance_url,
     return job_id
 
 def get_job_status(instance_url, access_token, job_id):
-    if "errorMessage" in s and s["errorMessage"]:
-        st.error(f"Salesforce says: {s['errorMessage']}")
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}"
-    return requests.get(url, headers={"Authorization": f"Bearer {access_token}"}).json()
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
+    # 1. Get the response first
+    res = requests.get(url, headers=headers)
+    
+    # 2. Convert to JSON
+    s = res.json()
+    
+    # 3. NOW you can check 's' for errors
+    if "errorMessage" in s and s["errorMessage"]:
+        st.error(f"Salesforce Error: {s['errorMessage']}")
+        
+    return s
 
 def get_failed_records(instance_url, access_token, job_id):
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}/failedResults"
