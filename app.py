@@ -140,7 +140,7 @@ def fetch_salesforce_data(instance_url,
 
 # Sidebar
 with st.sidebar:
-    st.title("🔐 Salesforce Login")
+    st.title("Salesforce Login")
 
     if st.button("Login to Salesforce"):
         res = login_salesforce(
@@ -152,12 +152,12 @@ with st.sidebar:
         if "access_token" in res:
             st.session_state['access_token'] = res['access_token']
             st.session_state['instance_url'] = res['instance_url']
-            st.success("Login Successful ✅")
+            st.success("Login Successful ")
         else:
-            st.error("Login Failed ❌")
+            st.error("Login Failed ")
 
     if "access_token" in st.session_state:
-        st.success("Connected to Salesforce ✅")
+        st.success("Connected to Salesforce ")
 
         if st.button("Logout"):
             st.session_state.clear()
