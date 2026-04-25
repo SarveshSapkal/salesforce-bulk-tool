@@ -80,7 +80,50 @@ def bulk_upload_to_salesforce(instance_url,
     requests.patch(f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}", 
                     json={"state": "UploadComplete"}, headers=headers)
     return job_id
+def bulk_delete(instance_url, access_token, object_name, csv_data):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
 
+    # Step 1: Create job
+    job_data = {
+        "object": object_name,
+        "operation": "delete",
+        "contentType": "CSV",
+        "lineEnding": "LF"
+    }
+
+    res = requests.post(
+        f"{instance_url}/services/data/v59.0/jobs/ingest",
+        json=job_data,
+        headers=headers
+    )
+
+    if res.status_code not in [200, 201]:
+        st.error(f"Job Creation Error: {res.text}")
+        return None
+
+    job_id = res.json().get("id")
+
+    # Step 2: Upload CSV
+    requests.put(
+        f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}/batches",
+        data=csv_data.encode('utf-8'),
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "text/csv"
+        }
+    )
+
+    # Step 3: Close job
+    requests.patch(
+        f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}",
+        json={"state": "UploadComplete"},
+        headers=headers
+    )
+
+    return job_id
 def get_job_status(instance_url, access_token, job_id):
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}"
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -269,7 +312,36 @@ if "access_token" in st.session_state:
                                                                 st.session_state['access_token'],
                                                                 j_id),width="content")
                                 save_upload_history(up_file.name, sel_obj, s_c, f_c)
-
+    with tab_del:
+        st.subheader("Bulk Delete")
+        dc1, dc2 = st.columns(2)
+        with dc1: del_obj = st.selectbox("Select Object", ["-- Select --"] + objects, key="del_obj")
+        with dc2: del_file = st.file_uploader("Upload ID CSV", type=["csv"], key="del_f")
+        if del_file and del_obj != "-- Select --":
+            df_del = pd.read_csv(del_file)
+            if "Id" not in df_del.columns: st.error("CSV must have 'Id' column.")
+            else:
+                conf = st.checkbox("Confirm Delete")
+                if st.button("Run Delete", disabled=not conf):
+                    start_d = time.time()
+                    j_id_d = bulk_delete(st.session_state['instance_url'], 
+                                         st.session_state['access_token'], 
+                                         del_obj, 
+                                         df_del[['Id']].to_csv(index=False))
+                    if j_id_d:
+                        st.info(f" Job: {j_id_d}")
+                        dpb = st.progress(0); dst = st.empty()
+                        while True:
+                            ds = get_job_status(st.session_state['instance_url'], 
+                                                st.session_state['access_token'], 
+                                                j_id_d)
+                            dstate, dproc = ds.get("state"), ds.get("numberRecordsProcessed", 0)
+                            dpb.progress(min(dproc/len(df_del), 1.0) if len(df_del)>0 else 0)
+                            dst.markdown(f"**Deleting:** {dproc:,}/{len(df_del):,} (`{dstate}`)")
+                            if dstate in ["JobComplete", "Failed", "Aborted"]: break
+                            time.sleep(2)
+                        st.metric("Status", dstate); 
+                        st.metric("Deleted", dproc)
     with tab_down:
         st.subheader("Download Data from Salesforce")
         d_obj = st.selectbox("Select Object", ["-- Select --"] + objects, key="d_obj")
