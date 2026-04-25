@@ -11,15 +11,18 @@ st.set_page_config(page_title="SF Bulk Tool", layout="wide", page_icon="☁️")
 
 
 # Functions
-def login_salesforce(client_id, client_secret, token_url):
-    payload = {'grant_type': 'client_credentials', 
-               'client_id': client_id, 
-               'client_secret': client_secret}
-    try:
-        res = requests.post(token_url, data=payload)
-        res.raise_for_status()
-        return res.json()
-    except Exception as e: return {"error": str(e)}
+client_id = st.text_input("Client ID")
+client_secret = st.text_input("Client Secret")
+token_url = st.text_input("Token URL")
+
+if st.button("Login"):
+    res = login_salesforce(client_id, client_secret, token_url)
+    if "access_token" in res:
+        st.session_state['access_token'] = res['access_token']
+        st.session_state['instance_url'] = res['instance_url']
+        st.success("Login Successful ✅")
+    else:
+        st.error("Login Failed ❌")
 
 def bulk_upload_to_salesforce(instance_url, 
                               access_token, 
