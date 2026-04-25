@@ -221,6 +221,13 @@ if "access_token" in st.session_state:
                                 stx.markdown(f"**Status:** `{state}` | **Processed:** {proc:,}/{tot:,}")
                                 if state in ["JobComplete", "Failed", "Aborted"]: break
                                 time.sleep(2)
+                            failed_df = get_failed_records(
+                                st.session_state['instance_url'],
+                                st.session_state['access_token'],
+                                j_id)
+                            if failed_df is not None and not failed_df.empty:
+                                st.subheader("❌ Failed Records Details")
+                                st.dataframe(failed_df)
                             
                             st.success(f"Finished in {time.time()-start:.2f}s")
                             f_c = s.get("numberRecordsFailed", 0); s_c = proc - f_c
