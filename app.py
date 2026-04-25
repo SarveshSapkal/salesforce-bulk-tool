@@ -6,7 +6,7 @@ import time
 # from microsoft_sql_db import save_mapping, load_mapping, save_upload_history, get_upload_history, save_user, get_user, save_downloaded_data
 # from bulk_delete import bulk_delete
 
-# ===== TEMP DUMMY FUNCTIONS FOR CLOUD =====
+
 def save_mapping(*args, **kwargs): pass
 def load_mapping(*args, **kwargs): return {}
 def save_upload_history(*args, **kwargs): pass
@@ -86,7 +86,7 @@ def bulk_delete(instance_url, access_token, object_name, csv_data):
         "Content-Type": "application/json"
     }
 
-    # Step 1: Create job
+    # Create job
     job_data = {
         "object": object_name,
         "operation": "delete",
@@ -106,7 +106,7 @@ def bulk_delete(instance_url, access_token, object_name, csv_data):
 
     job_id = res.json().get("id")
 
-    # Step 2: Upload CSV
+    # Upload CSV
     requests.put(
         f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}/batches",
         data=csv_data.encode('utf-8'),
@@ -116,7 +116,7 @@ def bulk_delete(instance_url, access_token, object_name, csv_data):
         }
     )
 
-    # Step 3: Close job
+    # Close job
     requests.patch(
         f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}",
         json={"state": "UploadComplete"},
@@ -128,13 +128,13 @@ def get_job_status(instance_url, access_token, job_id):
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}"
     headers = {"Authorization": f"Bearer {access_token}"}
     
-    # 1. Get the response first
+    
     res = requests.get(url, headers=headers)
     
-    # 2. Convert to JSON
+   
     s = res.json()
     
-    # 3. NOW you can check 's' for errors
+    
     if "errorMessage" in s and s["errorMessage"]:
         st.error(f"Salesforce Error: {s['errorMessage']}")
         
@@ -250,7 +250,7 @@ if "access_token" in st.session_state:
 
                 if st.button("Save Mapping"): save_mapping(sel_obj, final_mapping); st.toast("Saved!")
 
-                # Select External ID from final_mapping
+                
                 ext_id_field = None
                 if operation == "Upsert":
                     ext_id_field = st.selectbox("Select External ID Field", list(final_mapping.values()))
@@ -289,7 +289,7 @@ if "access_token" in st.session_state:
                                 st.session_state['access_token'],
                                 j_id)
                             if failed_df is not None and not failed_df.empty:
-                                st.subheader("❌ Failed Records Details")
+                                st.subheader(" Failed Records Details")
                                 st.dataframe(failed_df)
                             
                             st.success(f"Finished in {time.time()-start:.2f}s")
@@ -305,7 +305,7 @@ if "access_token" in st.session_state:
                                     j_id)
                             if failed_df is not None and not failed_df.empty:
                                 
-                                st.subheader("❌ Failed Records Details")
+                                st.subheader("Failed Records Details")
                                 st.dataframe(failed_df)
                                 
                                 st.dataframe(get_failed_records(st.session_state['instance_url'], 
