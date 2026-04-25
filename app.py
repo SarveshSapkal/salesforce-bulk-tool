@@ -19,10 +19,23 @@ def save_downloaded_data(*args, **kwargs): pass
 st.set_page_config(page_title="SF Bulk Tool", layout="wide", page_icon="☁️")
 
 
-# Functions
-client_id = st.text_input("Client ID")
-client_secret = st.text_input("Client Secret")
-token_url = st.text_input("Token URL")
+def login_salesforce(client_id, client_secret, token_url):
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret
+    }
+
+    res = requests.post(token_url, data=payload)
+
+    if res.status_code == 200:
+        data = res.json()
+        return {
+            "access_token": data["access_token"],
+            "instance_url": data["instance_url"]
+        }
+    else:
+        return {"error": res.text}
 
 
 def bulk_upload_to_salesforce(instance_url, 
@@ -119,10 +132,17 @@ with st.sidebar:
             st.success("Registered")
     else:
         if st.button("Login"):
-            st.session_state['username'] = username
-            st.session_state['access_token'] = "dummy"
-            st.session_state['instance_url'] = "https://dummy.salesforce.com"
-            st.success("Logged in successfully")
+          res = login_salesforce(
+            st.secrets["CLIENT_ID"],
+            st.secrets["CLIENT_SECRET"],
+            st.secrets["TOKEN_URL"])
+
+    if "access_token" in res:
+        st.session_state['access_token'] = res['access_token']
+        st.session_state['instance_url'] = res['instance_url']
+        st.success("Login Successful ✅")
+    else:
+        st.error("Login Failed ❌")
     if "access_token" in st.session_state:
         if st.button("Logout"): st.session_state.clear(); st.rerun()
 
