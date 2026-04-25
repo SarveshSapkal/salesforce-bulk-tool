@@ -87,8 +87,16 @@ def get_job_status(instance_url, access_token, job_id):
 
 def get_failed_records(instance_url, access_token, job_id):
     url = f"{instance_url}/services/data/v59.0/jobs/ingest/{job_id}/failedResults"
-    res = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
-    return pd.read_csv(io.StringIO(res.text)) if res.status_code == 200 else None
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    res = requests.get(url, headers=headers)
+
+    if res.status_code == 200 and res.text.strip():
+        try:
+            return pd.read_csv(io.StringIO(res.text))
+        except Exception:
+            return None
+    return None
 
 def get_fields(instance_url, access_token, object_name):
     url = f"{instance_url}/services/data/v59.0/sobjects/{object_name}/describe"
